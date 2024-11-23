@@ -1,5 +1,7 @@
 ﻿using FoodTester.Infrastructure.MessageBus.Messages;
+using FoodTester.Infrastructure.Settings;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using System;
 using System.Text;
@@ -11,18 +13,20 @@ namespace FoodTester.Services.MessageBus.Publishers
     public class RabbitMQPublisher : IRabbitMQPublisher, IDisposable
     {
         private readonly IConnection _connection;
-        private readonly RabbitMQ.Client.IModel _channel;
+        private readonly IModel _channel;
         private const string ExchangeName = "food_analysis";
         private const string QueueName = "analysis_requests";
         private const string RoutingKey = "analysis.request";
+        private readonly RabbitMqSettings _rabbitMqSettings;
 
-        public RabbitMQPublisher(IConfiguration configuration)
+        public RabbitMQPublisher(IConfiguration configuration, IOptions<AppSettings> settings)
         {
+            _rabbitMqSettings = settings.Value.RabbitMqSettings;
             var factory = new ConnectionFactory
             {
-                HostName = configuration["RabbitMQ:HostName"] ?? "localhost",
-                UserName = configuration["RabbitMQ:UserName"] ?? "guest",
-                Password = configuration["RabbitMQ:Password"] ?? "guest"
+                HostName = _rabbitMqSettings.HostName,
+                UserName = _rabbitMqSettings.UserName,
+                Password = _rabbitMqSettings.Password
             };
 
             _connection = factory.CreateConnection();

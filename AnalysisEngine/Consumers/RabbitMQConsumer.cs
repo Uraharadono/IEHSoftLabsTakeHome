@@ -3,6 +3,9 @@ using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 using FoodTester.Infrastructure.MessageBus.Messages;
+using AnalysisEngine.DockerService;
+using FoodTester.Infrastructure.Settings;
+using Microsoft.Extensions.Options;
 
 namespace AnalysisEngine.Consumers
 {
@@ -10,18 +13,23 @@ namespace AnalysisEngine.Consumers
     {
         private readonly IConnection _connection;
         private readonly IModel _channel;
+        private readonly IDockerService _dockerService;
         private readonly ILogger<RabbitMQConsumer> _logger;
         private const string ExchangeName = "food_analysis";
         private const string QueueName = "analysis_requests";
+        private readonly RabbitMqSettings _rabbitMqSettings;
 
-        public RabbitMQConsumer(IConfiguration configuration, ILogger<RabbitMQConsumer> logger)
+        public RabbitMQConsumer(IConfiguration configuration, ILogger<RabbitMQConsumer> logger, IOptions<AppSettings> settings, IDockerService dockerService)
         {
             _logger = logger;
+            _rabbitMqSettings = settings.Value.RabbitMqSettings;
+            _dockerService = dockerService;
+
             var factory = new ConnectionFactory
             {
-                HostName = configuration["RabbitMQ:HostName"] ?? "localhost",
-                UserName = configuration["RabbitMQ:UserName"] ?? "guest",
-                Password = configuration["RabbitMQ:Password"] ?? "guest"
+                HostName = _rabbitMqSettings.HostName,
+                UserName = _rabbitMqSettings.UserName,
+                Password = _rabbitMqSettings.Password
             };
 
             _connection = factory.CreateConnection();
@@ -36,15 +44,14 @@ namespace AnalysisEngine.Consumers
         {
             var consumer = new EventingBasicConsumer(_channel);
 
-            consumer.Received += (model, ea) =>
+            consumer.Received += async (model, ea) =>
             {
                 var body = ea.Body.ToArray();
-                var message = JsonSerializer.Deserialize<FoodAnalysisMessage>(
-                    Encoding.UTF8.GetString(body));
+                var message = JsonSerializer.Deserialize<FoodAnalysisMessage>(Encoding.UTF8.GetString(body));
 
                 try
                 {
-                    ProcessMessage(message);
+                    await ProcessMessage(message);
                     _channel.BasicAck(ea.DeliveryTag, false);
                 }
                 catch (Exception ex)
@@ -55,17 +62,38 @@ namespace AnalysisEngine.Consumers
             };
 
             _channel.BasicConsume(queue: QueueName,
-                                autoAck: false,
-                                consumer: consumer);
+                                  autoAck: false,
+                                  consumer: consumer);
 
             return Task.CompletedTask;
         }
 
-        private void ProcessMessage(FoodAnalysisMessage message)
+        private async Task ProcessMessage(FoodAnalysisMessage message)
         {
-            _logger.LogInformation("Processing analysis request for serial number: {SerialNumber}",
-                message.SerialNumber);
-            // TODO: implement the logic to create and manage AnalysisWorker containers
+            _logger.LogInformation("Processing analysis request for serial number: {SerialNumber}", message.SerialNumber);
+
+            try
+            {
+                // Start analysis worker container
+                var containerId = await _dockerService.StartAnalysisWorkerAsync(message);
+
+                // Wait for a while to let the analysis complete
+                await Task.Delay(TimeSpan.FromSeconds(5));
+
+                // Get container logs
+                var logs = await _dockerService.GetContainerLogsAsync(containerId);
+
+                // Stop the container
+                await _dockerService.StopContainerAsync(containerId);
+
+                // Here you would process the results and send them back to QualityManager
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing analysis for serial number {SerialNumber}",
+                    message.SerialNumber);
+                throw;
+            }
         }
 
         public override void Dispose()
