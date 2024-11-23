@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FoodTester.DbContext\FoodTester.DbContext.csproj" />
+    <ProjectReference Include="..\FoodTester.Infrastructure\FoodTester.Infrastructure.csproj" />
+    <ProjectReference Include="..\FoodTester.Utility\FoodTester.Utility.csproj" />
+  </ItemGroup>
+
+</Project>
