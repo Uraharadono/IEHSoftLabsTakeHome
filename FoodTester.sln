@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FoodTester.Utility", "FoodT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FoodTester.Services", "FoodTester.Services\FoodTester.Services.csproj", "{A5324018-25C0-4CD1-BB50-289BDE28773B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalysisEngine", "AnalysisEngine\AnalysisEngine.csproj", "{F42D8A53-0AFD-4B51-A360-7C89043294DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{A5324018-25C0-4CD1-BB50-289BDE28773B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5324018-25C0-4CD1-BB50-289BDE28773B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5324018-25C0-4CD1-BB50-289BDE28773B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F42D8A53-0AFD-4B51-A360-7C89043294DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F42D8A53-0AFD-4B51-A360-7C89043294DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F42D8A53-0AFD-4B51-A360-7C89043294DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F42D8A53-0AFD-4B51-A360-7C89043294DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

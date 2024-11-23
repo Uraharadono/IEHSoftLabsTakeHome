@@ -1,23 +1,25 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FoodTester.Api.Models;
 using FoodTester.Api.Utility.Extensions;
 using FoodTester.Services.Sample;
 using FoodTester.Services.Sample.Dto;
+using FoodTester.Infrastructure.Settings;
+using Microsoft.Extensions.Options;
 
 namespace FoodTester.Api.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SamplesController : ControllerBase
     {
         private readonly ISampleService _sampleService;
+        private readonly AppSettings _settings;
 
-        public SamplesController(ISampleService SampleService)
+        public SamplesController(ISampleService SampleService, IOptions<AppSettings> options)
         {
             _sampleService = SampleService;
+            _settings = options.Value;
         }
 
         [HttpGet, Route("get-samples")]

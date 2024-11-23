@@ -17,7 +17,8 @@ namespace FoodTester.Api.Utility.Extensions
             var appSettingsAssemblies = GetAppSettingsInjectableAssemblies();
             foreach (var assembly in appSettingsAssemblies)
             {
-                RegisterAppSettingsFromAssembly(services, assembly);
+                // This has been commented out, because IOptions now does not require me to manually mark these properties
+                // RegisterAppSettingsFromAssembly(services, assembly);
             }
 
             // After that we register services e.g. data fetching, data processing etc.

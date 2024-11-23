@@ -1,11 +1,14 @@
 ﻿using FoodTester.Api.Models;
 using FoodTester.DbContext.Entities;
+using FoodTester.Infrastructure.MessageBus.Messages;
 using FoodTester.Services.AnalysisRequestService;
 using FoodTester.Services.AnalysisRequestService.Dtos;
 using FoodTester.Services.FoodBatchService;
 using FoodTester.Services.FoodBatchService.Dtos;
+using FoodTester.Services.MessageBus.Publishers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace FoodTester.Api.Controllers
@@ -17,15 +20,18 @@ namespace FoodTester.Api.Controllers
         private readonly ILogger<QualityManagerController> _logger;
         private readonly IFoodBatchService _foodBatchService;
         private readonly IAnalysisRequestService _analysisRequestService;
+        private readonly IRabbitMQPublisher _publisher;
 
         public QualityManagerController(
             ILogger<QualityManagerController> logger,
             IFoodBatchService foodBatchService,
-            IAnalysisRequestService analysisRequestService)
+            IAnalysisRequestService analysisRequestService,
+            IRabbitMQPublisher publisher)
         {
             _logger = logger;
             _foodBatchService = foodBatchService;
             _analysisRequestService = analysisRequestService;
+            _publisher = publisher;
         }
 
         [HttpPost("food-batch")]
@@ -75,6 +81,15 @@ namespace FoodTester.Api.Controllers
             var createdAnalysisRequest = await _analysisRequestService.CreateAnalysisRequestAsync(analysisRequestDto);
 
             _logger.LogInformation("Created new analysis request for BatchId: {BatchId}", createdAnalysisRequest.BatchId);
+
+            var message = new FoodAnalysisMessage
+            {
+                // SerialNumber = createdAnalysisRequest.BatchId,
+                // FoodType = createdAnalysisRequest.,
+                // RequiredAnalyses = createdAnalysisRequest.AnalysisTypeId,
+                RequestedAt = DateTime.UtcNow
+            };
+            await _publisher.PublishAnalysisRequestAsync(message);
 
             return CreatedAtAction(nameof(GetAnalysisRequest), new { id = createdAnalysisRequest.Id }, createdAnalysisRequest);
         }

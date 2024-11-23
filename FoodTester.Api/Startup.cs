@@ -5,13 +5,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using FoodTester.Api.Infrastructure.Helpers;
-using FoodTester.Api.Utility;
 using FoodTester.Api.Utility.Extensions;
 using FoodTester.DbContext.Infrastructure;
 using FoodTester.Infrastructure.Settings;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 using FoodTester.DbContext.Seeders.Base;
+using FoodTester.Services.MessageBus.Publishers;
 
 namespace FoodTester.Api
 {
@@ -19,21 +19,23 @@ namespace FoodTester.Api
     {
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment HostingEnvironment { get; }
-        public IAppSettings Settings { get; }
+        public AppSettings Settings { get; set; }
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
             HostingEnvironment = env;
-            Settings = new AppSettings(configuration);
+            Settings = new AppSettings();
         }
-
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             // I am literally registering this DB Context here, just so I can use EF Core Identity
             services.AddDbContext<FoodQualityContext>(options => options.UseSqlServer(Configuration.GetConnectionString("FoodTesterDb")));
+
+            Configuration.GetSection("AppSettings").Bind(Settings);
+            services.Configure<AppSettings>(options => Configuration.GetSection("AppSettings").Bind(options));
 
             services.AddControllers() // we need only controllers for our api now
                 .AddNewtonsoftJson(options =>
@@ -48,11 +50,13 @@ namespace FoodTester.Api
             // Do our magic to load services automatically, and resolve their DI
             services.AutoRegisterServices();
 
+            services.AddSingleton<IRabbitMQPublisher, RabbitMQPublisher>();
+
             services.AddCors(options =>
             {
                 options.AddPolicy("default", policy =>
                 {
-                    policy.WithOrigins(Settings.ClientBaseUrl)
+                    policy.WithOrigins(Settings.ClientAppSettings.ClientBaseUrl)
                         .SetIsOriginAllowed(isOriginAllowed: _ => true)
                         .AllowAnyHeader()
                         .AllowAnyMethod()
@@ -62,19 +66,15 @@ namespace FoodTester.Api
 
             var logger = new LoggerConfiguration()
                                 .Enrich.FromLogContext()
-                                .Enrich.WithProperty("ApplicationName", "Food tester application")
+                                .Enrich.WithProperty("ApplicationName", "Quality manager API")
                                 .WriteTo.Console()
                                 .MinimumLevel.Override("  Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
-                                .WriteTo.File($"{Settings.BaseFolder}{Settings.LogsFolder}\\food_tester_log.txt", rollingInterval: RollingInterval.Hour);
+                                .WriteTo.File($"{Settings.FolderSettings.BaseFolder}{Settings.FolderSettings.LogsFolder}\\food_tester_log.txt", rollingInterval: RollingInterval.Hour);
 
 
             if (HostingEnvironment.IsDevelopment())
             {
                 SwaggerHelper.ConfigureService(services);
-
-                // If deploying to Azure, I need to add lines below as they are going to enable us to view events on the Azure: https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview?tabs=net
-                //var telemetryConfiguration = new TelemetryConfiguration(globConfig.AppInsights.InstrumentationKey);
-                //logger.WriteTo.ApplicationInsights(telemetryConfiguration, telemetryConverter: TelemetryConverter.Traces);
             }
 
             Log.Logger = logger.CreateLogger();
@@ -103,7 +103,7 @@ namespace FoodTester.Api
                 // specifying the Swagger JSON endpoint.
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Quality manager API");
                     c.RoutePrefix = "";
                 });
 
