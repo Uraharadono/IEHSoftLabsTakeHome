@@ -18,7 +18,7 @@ namespace AnalysisWorker
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Starting analysis for serial number: {SerialNumber}", _serialNumber);
+            _logger.LogInformation("AnalysisWorker.cs -> Starting analysis for serial number: {SerialNumber}", _serialNumber);
 
             foreach (var analysis in _requiredAnalyses)
             {

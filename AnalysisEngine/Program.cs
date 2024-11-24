@@ -10,7 +10,6 @@ namespace AnalysisEngine
         {
             var builder = Host.CreateApplicationBuilder(args);
             builder.Services.Configure<AppSettings>(options => builder.Configuration.GetSection("AppSettings").Bind(options));
-            builder.Services.AddHostedService<Worker>();
             builder.Services.AddHostedService<RabbitMQConsumer>();
             builder.Services.AddSingleton<IDockerService, AnalysisEngine.DockerService.DockerService>();
 

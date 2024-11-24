@@ -1,0 +1,48 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "FoodTester.Infrastructure.Grpc";
+
+package analysis;
+
+service AnalysisService {
+  rpc StartAnalysis (AnalysisRequest) returns (AnalysisResponse);
+  rpc GetAnalysisStatus (StatusRequest) returns (StatusResponse);
+}
+
+message AnalysisRequest {
+  string serial_number = 1;
+  string food_type = 2;
+  repeated string required_analyses = 3;
+}
+
+message AnalysisResponse {
+  string analysis_id = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message StatusRequest {
+  string analysis_id = 1;
+}
+
+message StatusResponse {
+  string analysis_id = 1;
+  AnalysisStatus status = 2;
+  repeated AnalysisResult results = 3;
+  string error_message = 4;
+}
+
+enum AnalysisStatus {
+  UNKNOWN = 0;
+  IN_PROGRESS = 1;
+  COMPLETED = 2;
+  FAILED = 3;
+}
+
+message AnalysisResult {
+  string analysis_type = 1;
+  bool passed = 2;
+  string details = 3;
+  double value = 4;
+  string unit = 5;
+}

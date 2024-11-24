@@ -66,12 +66,28 @@ namespace AnalysisEngine.DockerService
                     {
                         AutoRemove = true,
                         Memory = 512L * 1024L * 1024L,
-                        MemorySwap = 512L * 1024L * 1024L
+                        MemorySwap = 512L * 1024L * 1024L,
+                        PortBindings = new Dictionary<string, IList<PortBinding>>
+                        {
+                            {
+                                "5000/tcp",
+                                new List<PortBinding>
+                                {
+                                    new PortBinding
+                                    {
+                                        HostPort = "0" // Docker will assign a random available port
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    ExposedPorts = new Dictionary<string, EmptyStruct>
+                    {
+                        { "5000/tcp", new EmptyStruct() }
                     }
                 };
 
                 var container = await _dockerClient.Containers.CreateContainerAsync(createParams);
-
                 _logger.LogInformation($"Container created with ID: {container.ID}");
 
                 // Start container
@@ -79,10 +95,67 @@ namespace AnalysisEngine.DockerService
                     container.ID,
                     new ContainerStartParameters());
 
-                _logger.LogInformation(
-                    "Started analysis worker container {ContainerId} for serial number {SerialNumber}",
-                    container.ID,
-                    message.SerialNumber);
+                // Wait for container to be ready
+                const int maxRetries = 10;
+                const int delayMs = 500;
+                var success = false;
+
+                for (int i = 0; i < maxRetries && !success; i++)
+                {
+                    try
+                    {
+                        await Task.Delay(delayMs); // Wait before checking
+
+                        var containers = await _dockerClient.Containers.ListContainersAsync(
+                            new ContainersListParameters
+                            {
+                                All = true,
+                                Filters = new Dictionary<string, IDictionary<string, bool>>
+                                {
+                            {
+                                "id",
+                                new Dictionary<string, bool>
+                                {
+                                    { container.ID, true }
+                                }
+                            }
+                                }
+                            });
+
+                        if (containers.Any(c => c.ID == container.ID))
+                        {
+                            success = true;
+                            _logger.LogInformation(
+                                "Successfully verified container {ContainerId} is running for serial number {SerialNumber}",
+                                container.ID,
+                                message.SerialNumber);
+                        }
+                        else
+                        {
+                            _logger.LogWarning(
+                                "Container {ContainerId} not found in running containers list, attempt {Attempt}/{MaxRetries}",
+                                container.ID,
+                                i + 1,
+                                maxRetries);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(
+                            ex,
+                            "Error checking container status on attempt {Attempt}/{MaxRetries}",
+                            i + 1,
+                            maxRetries);
+
+                        if (i == maxRetries - 1)
+                            throw;
+                    }
+                }
+
+                if (!success)
+                {
+                    throw new Exception($"Container {container.ID} failed to start properly after {maxRetries} attempts");
+                }
 
                 return container.ID;
             }
@@ -170,6 +243,55 @@ namespace AnalysisEngine.DockerService
 
             System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
             return logs;
+        }
+
+        public async Task<ContainerInfo> GetContainerInfoAsync(string containerId)
+        {
+            const int maxRetries = 5;
+            const int delayMilliseconds = 500;
+
+            for (int i = 0; i < maxRetries; i++)
+            {
+                try
+                {
+                    var response = await _dockerClient.Containers.InspectContainerAsync(containerId);
+                    var portBindings = response.NetworkSettings.Ports;
+
+                    var portMappings = new List<PortMapping>();
+                    foreach (var binding in portBindings)
+                    {
+                        if (binding.Value != null && binding.Value.Any())
+                        {
+                            portMappings.Add(new PortMapping
+                            {
+                                PrivatePort = int.Parse(binding.Key.Split('/')[0]),
+                                PublicPort = int.Parse(binding.Value[0].HostPort),
+                                Type = binding.Key.Split('/')[1]
+                            });
+                        }
+                    }
+
+                    return new ContainerInfo
+                    {
+                        Id = containerId,
+                        Ports = portMappings
+                    };
+                }
+                catch (DockerContainerNotFoundException) when (i < maxRetries - 1)
+                {
+                    _logger.LogWarning("Container {ContainerId} not found on attempt {Attempt}, retrying...",
+                        containerId, i + 1);
+                    await Task.Delay(delayMilliseconds);
+                    continue;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error getting container info for {ContainerId}", containerId);
+                    throw;
+                }
+            }
+
+            throw new DockerContainerNotFoundException(System.Net.HttpStatusCode.InternalServerError, $"Container {containerId} not found after {maxRetries} attempts");
         }
     }
 }

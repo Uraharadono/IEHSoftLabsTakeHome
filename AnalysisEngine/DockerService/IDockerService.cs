@@ -7,5 +7,6 @@ namespace AnalysisEngine.DockerService
         Task<string> StartAnalysisWorkerAsync(FoodAnalysisMessage message);
         Task StopContainerAsync(string containerId);
         Task<string> GetContainerLogsAsync(string containerId);
+        Task<ContainerInfo> GetContainerInfoAsync(string containerId);
     }
 }
