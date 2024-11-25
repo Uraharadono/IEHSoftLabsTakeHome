@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "FoodTester.Infrastructure.Grpc";
+option csharp_namespace = "AnalysisWorker.Grpc";
 
 package analysis;
 
