@@ -9,6 +9,7 @@ using FoodTester.Services.MessageBus.Publishers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FoodTester.Api.Controllers
@@ -81,17 +82,46 @@ namespace FoodTester.Api.Controllers
             var createdAnalysisRequest = await _analysisRequestService.CreateAnalysisRequestAsync(analysisRequestDto);
 
             _logger.LogInformation("Created new analysis request for BatchId: {BatchId}", createdAnalysisRequest.BatchId);
+            return CreatedAtAction(nameof(GetAnalysisRequest), new { id = createdAnalysisRequest.Id }, createdAnalysisRequest);
+        }
+
+        [HttpGet("start-batch-process/{id}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> StartBatchProcess(long id)
+        {
+            var foodBatch = await _foodBatchService.GetFoodBatchAsync(id, true);
+
+            if (foodBatch == null)
+            {
+                return NotFound();
+            }
 
             var message = new FoodAnalysisMessage
             {
-                // SerialNumber = createdAnalysisRequest.BatchId,
-                // FoodType = createdAnalysisRequest.,
-                // RequiredAnalyses = createdAnalysisRequest.AnalysisTypeId,
+                SerialNumber = foodBatch.SerialNumber,
+                // FoodType = food,
+                RequiredAnalyses = foodBatch.AnalysisRequests.Select(s => s.AnalysisType).ToArray(),
                 RequestedAt = DateTime.UtcNow
             };
             await _publisher.PublishAnalysisRequestAsync(message);
 
-            return CreatedAtAction(nameof(GetAnalysisRequest), new { id = createdAnalysisRequest.Id }, createdAnalysisRequest);
+            return Ok();
+        }
+
+
+        [HttpGet("test-lalala")]
+        public async Task<IActionResult> TestLalala()
+        {
+            var message = new FoodAnalysisMessage
+            {
+                SerialNumber = "SERIJSKI BROJ",
+                FoodType = "TIP HRANE",
+                RequiredAnalyses = ["analiza 1", "analiza 2", "analiza 3"],
+                RequestedAt = DateTime.UtcNow
+            };
+            await _publisher.PublishAnalysisRequestAsync(message);
+            return Ok();
         }
 
         [HttpGet("analysis-request/{id}")]

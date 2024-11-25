@@ -1,5 +1,4 @@
-﻿using FoodTester.DbContext.Enums;
-using FoodTester.Services.AnalysisRequestService.Dtos;
+﻿using FoodTester.Services.AnalysisRequestService.Dtos;
 using System.ComponentModel.DataAnnotations;
 
 namespace FoodTester.Api.Models
@@ -12,10 +11,6 @@ namespace FoodTester.Api.Models
         [Required]
         public long AnalysisTypeId { get; set; }
 
-        [Required]
-        [EnumDataType(typeof(EAnalysisRequestStatus))]
-        public string Status { get; set; }
-
 
         public static explicit operator AnalysisRequestDto(AnalysisRequestViewModel model)
         {
@@ -23,7 +18,6 @@ namespace FoodTester.Api.Models
             {
                 BatchId = model.BatchId,
                 AnalysisTypeId = model.AnalysisTypeId,
-                Status = model.Status
             };
         }
     }

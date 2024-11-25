@@ -25,9 +25,13 @@ namespace FoodTester.Services.FoodBatchService
             return (FoodBatchDto)foodBatch;
         }
 
-        public async Task<FoodBatchDto> GetFoodBatchAsync(long id)
+        public async Task<FoodBatchDto> GetFoodBatchAsync(long id, bool includeAnalysisRequests = false)
         {
-            return (FoodBatchDto)await _context.FoodBatches.FirstOrDefaultAsync(s => s.Id == id);
+            IQueryable<FoodBatch> query = _context.FoodBatches;
+            if (includeAnalysisRequests)
+                query = query.Include(ar => ar.AnalysisRequests).ThenInclude(at => at.AnalysisType);
+
+            return (FoodBatchDto)await query.FirstOrDefaultAsync(s => s.Id == id);
         }
 
         public async Task<List<string>> GetAnalysisResults(string serialNumber)

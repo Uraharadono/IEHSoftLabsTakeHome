@@ -18,8 +18,8 @@ namespace FoodTester.DbContext.Seeders.Base
         {
             if (!debug) return;
 
-            DbContext.Database.EnsureDeleted();
-            DbContext.Database.EnsureCreated();
+            // DbContext.Database.EnsureDeleted();
+            // DbContext.Database.EnsureCreated();
 
             try
             {

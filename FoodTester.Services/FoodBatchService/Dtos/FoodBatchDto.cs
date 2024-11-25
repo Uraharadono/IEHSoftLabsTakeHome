@@ -1,4 +1,7 @@
 ﻿using FoodTester.DbContext.Entities;
+using FoodTester.Services.AnalysisRequestService.Dtos;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FoodTester.Services.FoodBatchService.Dtos
 {
@@ -9,6 +12,8 @@ namespace FoodTester.Services.FoodBatchService.Dtos
         public string Name { get; set; }
 
         public string SerialNumber { get; set; }
+
+        public List<AnalysisRequestDto> AnalysisRequests { get; set; }
 
         public static explicit operator FoodBatch(FoodBatchDto model)
         {
@@ -26,7 +31,8 @@ namespace FoodTester.Services.FoodBatchService.Dtos
             {
                 Id = model.Id,
                 Name = model.Name,
-                SerialNumber = model.SerialNumber
+                SerialNumber = model.SerialNumber,
+                AnalysisRequests = model.AnalysisRequests?.Select(ar => (AnalysisRequestDto)ar).ToList()
             };
         }
     }

@@ -8,7 +8,7 @@ namespace FoodTester.Services.FoodBatchService
     public interface IFoodBatchService : IService
     {
         Task<FoodBatchDto> CreateFoodBatchAsync(FoodBatchDto foodBatchDto);
-        Task<FoodBatchDto> GetFoodBatchAsync(long id);
+        Task<FoodBatchDto> GetFoodBatchAsync(long id, bool includeAnalysisRequests = false);
         Task<List<string>> GetAnalysisResults(string serialNumber);
     }
 }

@@ -20,6 +20,7 @@ namespace FoodTester.Services.AnalysisRequestService
             var analysisRequest = (AnalysisRequest)analysisRequestDto;
             var dbEntity = await _context.AnalysisRequests.AddAsync(analysisRequest);
             await _context.SaveChangesAsync();
+            // await dbEntity.Reference(s => s.FoodBatch).LoadAsync();
 
             return (AnalysisRequestDto)analysisRequest;
         }
