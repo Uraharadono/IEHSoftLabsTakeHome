@@ -5,8 +5,7 @@ option csharp_namespace = "FoodTester.Infrastructure.Grpc";
 package analysis;
 
 service AnalysisService {
-  rpc StartAnalysis (AnalysisRequest) returns (AnalysisResponse);
-  rpc GetAnalysisStatus (StatusRequest) returns (StatusResponse);
+  rpc AnalyzeFood (AnalysisRequest) returns (stream AnalysisUpdate);
 }
 
 message AnalysisRequest {
@@ -15,28 +14,11 @@ message AnalysisRequest {
   repeated string required_analyses = 3;
 }
 
-message AnalysisResponse {
-  string analysis_id = 1;
-  bool success = 2;
-  string message = 3;
-}
-
-message StatusRequest {
-  string analysis_id = 1;
-}
-
-message StatusResponse {
-  string analysis_id = 1;
+message AnalysisUpdate {
+  string serial_number = 1;
   AnalysisStatus status = 2;
-  repeated AnalysisResult results = 3;
+  AnalysisResult result = 3;
   string error_message = 4;
-}
-
-enum AnalysisStatus {
-  UNKNOWN = 0;
-  IN_PROGRESS = 1;
-  COMPLETED = 2;
-  FAILED = 3;
 }
 
 message AnalysisResult {
@@ -45,4 +27,11 @@ message AnalysisResult {
   string details = 3;
   double value = 4;
   string unit = 5;
+}
+
+enum AnalysisStatus {
+  UNKNOWN = 0;
+  IN_PROGRESS = 1;
+  COMPLETED = 2;
+  FAILED = 3;
 }

@@ -8,6 +8,7 @@ using FoodTester.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using Grpc.Net.Client;
 using FoodTester.Infrastructure.Grpc;
+using Grpc.Core;
 
 namespace AnalysisEngine.Consumers
 {
@@ -83,17 +84,18 @@ namespace AnalysisEngine.Consumers
                     message.SerialNumber);
 
                 // 1. Create and start the AnalysisWorker container
-                containerId = await _dockerService.StartAnalysisWorkerAsync(message);
+                /*containerId = await _dockerService.StartAnalysisWorkerAsync(message);
                 _logger.LogInformation("Started container {ContainerId}", containerId);
 
                 // 2. Get the container's gRPC port mapping
                 var containerInfo = await _dockerService.GetContainerInfoAsync(containerId);
-                var hostPort = containerInfo.Ports.First().PublicPort;
+                var hostPort = containerInfo.Ports.First().PublicPort;*/
 
                 // 3. Create gRPC channel to the worker
-                var channelUrl = $"http://localhost:{hostPort}";
+                // var channelUrl = $"http://localhost:{hostPort}";
+                var channelUrl = "https://localhost:44336";
                 grpcChannel = GrpcChannel.ForAddress(channelUrl);
-                _grpcChannels[containerId] = grpcChannel;
+                // _grpcChannels[containerId] = grpcChannel;
 
                 var client = new AnalysisService.AnalysisServiceClient(grpcChannel);
 
@@ -105,38 +107,37 @@ namespace AnalysisEngine.Consumers
                 };
                 analysisRequest.RequiredAnalyses.AddRange(message.RequiredAnalyses);
 
-                var startResponse = await client.StartAnalysisAsync(analysisRequest);
-
-                if (!startResponse.Success)
-                {
-                    throw new Exception($"Failed to start analysis: {startResponse.Message}");
-                }
-
-                // 5. Poll for analysis completion
-                var analysisComplete = false;
-                var statusRequest = new StatusRequest { AnalysisId = startResponse.AnalysisId };
+                // 5. Process streaming responses
                 var results = new List<AnalysisResult>();
+                var cts = new CancellationTokenSource(TimeSpan.FromMinutes(30)); // Timeout after 30 minutes
 
-                while (!analysisComplete)
+                using var call = client.AnalyzeFood(analysisRequest, cancellationToken: cts.Token);
+                await foreach (var update in call.ResponseStream.ReadAllAsync(cts.Token))
                 {
-                    var statusResponse = await client.GetAnalysisStatusAsync(statusRequest);
-
-                    switch (statusResponse.Status)
+                    switch (update.Status)
                     {
-                        case AnalysisStatus.Completed:
-                            analysisComplete = true;
-                            results.AddRange(statusResponse.Results);
+                        case AnalysisStatus.InProgress:
+                            if (update.Result != null)
+                            {
+                                results.Add(update.Result);
+                                _logger.LogInformation("Received result for {AnalysisType}",
+                                    update.Result.AnalysisType);
+                            }
                             break;
+
+                        case AnalysisStatus.Completed:
+                            _logger.LogInformation("Analysis completed for {SerialNumber}",
+                                message.SerialNumber);
+                            // Publish final results
+                            await PublishResultsToQualityManager(message.SerialNumber, results);
+                            return;
 
                         case AnalysisStatus.Failed:
-                            throw new Exception($"Analysis failed: {statusResponse.ErrorMessage}");
-
-                        case AnalysisStatus.InProgress:
-                            await Task.Delay(TimeSpan.FromSeconds(5));
-                            break;
+                            throw new Exception($"Analysis failed: {update.ErrorMessage}");
 
                         default:
-                            throw new Exception($"Unknown analysis status: {statusResponse.Status}");
+                            _logger.LogWarning("Received unknown status: {Status}", update.Status);
+                            break;
                     }
                 }
 
