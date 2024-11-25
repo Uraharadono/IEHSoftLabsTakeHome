@@ -49,20 +49,20 @@ namespace AnalysisEngine.Consumers
         {
             var consumer = new EventingBasicConsumer(_channel);
 
-            consumer.Received += async (model, ea) =>
+            consumer.Received += async (model, eventArgs) =>
             {
-                var body = ea.Body.ToArray();
+                var body = eventArgs.Body.ToArray();
                 var message = JsonSerializer.Deserialize<FoodAnalysisMessage>(Encoding.UTF8.GetString(body));
 
                 try
                 {
                     await ProcessMessage(message);
-                    _channel.BasicAck(ea.DeliveryTag, false);
+                    _channel.BasicAck(eventArgs.DeliveryTag, false);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error processing message");
-                    _channel.BasicNack(ea.DeliveryTag, false, true);
+                    _channel.BasicNack(eventArgs.DeliveryTag, false, true);
                 }
             };
 
@@ -84,18 +84,17 @@ namespace AnalysisEngine.Consumers
                     message.SerialNumber);
 
                 // 1. Create and start the AnalysisWorker container
-                /*containerId = await _dockerService.StartAnalysisWorkerAsync(message);
+                containerId = await _dockerService.StartAnalysisWorkerAsync(message);
                 _logger.LogInformation("Started container {ContainerId}", containerId);
 
                 // 2. Get the container's gRPC port mapping
                 var containerInfo = await _dockerService.GetContainerInfoAsync(containerId);
-                var hostPort = containerInfo.Ports.First().PublicPort;*/
+                var hostPort = containerInfo.Ports.First().PublicPort;
 
                 // 3. Create gRPC channel to the worker
-                // var channelUrl = $"http://localhost:{hostPort}";
-                var channelUrl = "https://localhost:44336";
+                var channelUrl = $"http://localhost:{hostPort}";
                 grpcChannel = GrpcChannel.ForAddress(channelUrl);
-                // _grpcChannels[containerId] = grpcChannel;
+                _grpcChannels[containerId] = grpcChannel;
 
                 var client = new AnalysisService.AnalysisServiceClient(grpcChannel);
 
