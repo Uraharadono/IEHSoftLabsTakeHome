@@ -18,6 +18,9 @@ then run: `docker build --no-cache -t analysis-worker:latest .`
 5. In Visual studio set following projects as startup ones: **FoodTester.Api** & **AnalysisEngine**
  AnalysisWorker project will be resolved dynamically by **AnalysisEngine**.
 
+# How I designed flow:
+![image](https://github.com/user-attachments/assets/8bdea940-00df-4438-99ec-4835058334e2)
+
 
 # Info
 1. Project with name "**QualityManager** " in pdf of task, I have named "**FoodTester.Api**". 
