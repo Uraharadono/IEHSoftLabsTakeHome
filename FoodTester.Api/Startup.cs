@@ -12,6 +12,7 @@ using Newtonsoft.Json.Serialization;
 using Serilog;
 using FoodTester.DbContext.Seeders.Base;
 using FoodTester.Services.MessageBus.Publishers;
+using FoodTester.Api.MessageBusConsumers;
 
 namespace FoodTester.Api
 {
@@ -51,6 +52,7 @@ namespace FoodTester.Api
             services.AutoRegisterServices();
 
             services.AddSingleton<IRabbitMQPublisher, RabbitMQPublisher>();
+            services.AddHostedService<AnalysisResultConsumer>();
 
             services.AddCors(options =>
             {

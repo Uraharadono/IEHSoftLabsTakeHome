@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FoodTester.DbContext.Migrations
 {
     [DbContext(typeof(FoodQualityContext))]
-    [Migration("20241122225746_InitMigration")]
+    [Migration("20241126075022_InitMigration")]
     partial class InitMigration
     {
         /// <inheritdoc />
@@ -58,25 +58,16 @@ namespace FoodTester.DbContext.Migrations
             modelBuilder.Entity("FoodTester.DbContext.Entities.AnalysisResult", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<long>("RequestId")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("ResultData")
                         .IsRequired()
                         .HasColumnType("VARCHAR(MAX)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RequestId")
-                        .IsUnique();
 
                     b.ToTable("AnalysisResults");
                 });
@@ -185,7 +176,7 @@ namespace FoodTester.DbContext.Migrations
                 {
                     b.HasOne("FoodTester.DbContext.Entities.AnalysisRequest", "AnalysisRequest")
                         .WithOne("AnalysisResult")
-                        .HasForeignKey("FoodTester.DbContext.Entities.AnalysisResult", "RequestId")
+                        .HasForeignKey("FoodTester.DbContext.Entities.AnalysisResult", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

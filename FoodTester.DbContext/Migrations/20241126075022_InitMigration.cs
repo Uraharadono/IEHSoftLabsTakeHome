@@ -91,18 +91,16 @@ namespace FoodTester.DbContext.Migrations
                 name: "AnalysisResults",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
                     ResultData = table.Column<string>(type: "VARCHAR(MAX)", nullable: false),
-                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RequestId = table.Column<long>(type: "bigint", nullable: false)
+                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AnalysisResults", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AnalysisResults_AnalysisRequests_RequestId",
-                        column: x => x.RequestId,
+                        name: "FK_AnalysisResults_AnalysisRequests_Id",
+                        column: x => x.Id,
                         principalTable: "AnalysisRequests",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -117,12 +115,6 @@ namespace FoodTester.DbContext.Migrations
                 name: "IX_AnalysisRequests_BatchId",
                 table: "AnalysisRequests",
                 column: "BatchId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AnalysisResults_RequestId",
-                table: "AnalysisResults",
-                column: "RequestId",
-                unique: true);
         }
 
         /// <inheritdoc />

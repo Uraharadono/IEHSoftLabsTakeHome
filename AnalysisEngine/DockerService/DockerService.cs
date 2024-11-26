@@ -60,7 +60,7 @@ namespace AnalysisEngine.DockerService
                     {
                         $"SERIAL_NUMBER={message.SerialNumber}",
                         $"FOOD_TYPE={message.FoodType}",
-                        $"REQUIRED_ANALYSES={string.Join(",", message.RequiredAnalyses ?? Array.Empty<string>())}"
+                        // $"REQUIRED_ANALYSES={string.Join(",", message.RequiredAnalyses ?? Array.Empty<string>())}"
                     },
                     HostConfig = new HostConfig
                     {

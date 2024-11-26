@@ -17,8 +17,7 @@ namespace AnalysisWorker.Services
             IServerStreamWriter<AnalysisUpdate> responseStream,
             ServerCallContext context)
         {
-            _logger.LogInformation("Starting analysis for serial number {SerialNumber}",
-                request.SerialNumber);
+            _logger.LogInformation($"Starting analysis for serial number {request.SerialNumber}");
 
             try
             {
@@ -42,7 +41,8 @@ namespace AnalysisWorker.Services
 
                     var result = new AnalysisResult
                     {
-                        AnalysisType = analysisType,
+                        AnalysisId = analysisType.AnalysisId,
+                        AnalysisType = analysisType.AnalysisName,
                         Passed = Random.Shared.Next(100) > 20, // 80% pass rate
                         Details = $"Completed {analysisType} analysis",
                         Value = Random.Shared.NextDouble() * 100,

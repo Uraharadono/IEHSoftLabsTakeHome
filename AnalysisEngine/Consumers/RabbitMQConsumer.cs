@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Grpc.Net.Client;
 using FoodTester.Infrastructure.Grpc;
 using Grpc.Core;
+using AnalysisEngine.Publishers;
 
 namespace AnalysisEngine.Consumers
 {
@@ -17,18 +18,20 @@ namespace AnalysisEngine.Consumers
         private readonly IConnection _connection;
         private readonly IModel _channel;
         private readonly IDockerService _dockerService;
+        private readonly IResultPublisher _resultPublisher;
         private readonly ILogger<RabbitMQConsumer> _logger;
         private readonly Dictionary<string, GrpcChannel> _grpcChannels;
         private const string ExchangeName = "food_analysis";
         private const string QueueName = "analysis_requests";
         private readonly RabbitMqSettings _rabbitMqSettings;
 
-        public RabbitMQConsumer(IConfiguration configuration, ILogger<RabbitMQConsumer> logger, IOptions<AppSettings> settings, IDockerService dockerService)
+        public RabbitMQConsumer(IConfiguration configuration, ILogger<RabbitMQConsumer> logger, IOptions<AppSettings> settings, IDockerService dockerService, IResultPublisher resultPublisher)
         {
             _logger = logger;
             _rabbitMqSettings = settings.Value.RabbitMqSettings;
             _dockerService = dockerService;
             _grpcChannels = new Dictionary<string, GrpcChannel>();
+            _resultPublisher = resultPublisher;
 
             var factory = new ConnectionFactory
             {
@@ -84,7 +87,7 @@ namespace AnalysisEngine.Consumers
                     message.SerialNumber);
 
                 // 1. Create and start the AnalysisWorker container
-                containerId = await _dockerService.StartAnalysisWorkerAsync(message);
+                /* containerId = await _dockerService.StartAnalysisWorkerAsync(message);
                 _logger.LogInformation("Started container {ContainerId}", containerId);
 
                 // 2. Get the container's gRPC port mapping
@@ -92,9 +95,10 @@ namespace AnalysisEngine.Consumers
                 var hostPort = containerInfo.Ports.First().PublicPort;
 
                 // 3. Create gRPC channel to the worker
-                var channelUrl = $"http://localhost:{hostPort}";
+                // var channelUrl = $"http://localhost:{hostPort}";
+                // _grpcChannels[containerId] = grpcChannel; */
+                var channelUrl = "https://localhost:44336";
                 grpcChannel = GrpcChannel.ForAddress(channelUrl);
-                _grpcChannels[containerId] = grpcChannel;
 
                 var client = new AnalysisService.AnalysisServiceClient(grpcChannel);
 
@@ -102,9 +106,13 @@ namespace AnalysisEngine.Consumers
                 var analysisRequest = new AnalysisRequest
                 {
                     SerialNumber = message.SerialNumber,
-                    FoodType = message.FoodType
+                    FoodType = "FoodType",
                 };
-                analysisRequest.RequiredAnalyses.AddRange(message.RequiredAnalyses);
+                analysisRequest.RequiredAnalyses.AddRange(message.RequiredAnalyses.Select(s => new FoodTester.Infrastructure.Grpc.FoodAnalysisType
+                {
+                    AnalysisId = s.AnalysisId,
+                    AnalysisName = s.AnalysisName
+                }).ToList());
 
                 // 5. Process streaming responses
                 var results = new List<AnalysisResult>();
@@ -125,9 +133,7 @@ namespace AnalysisEngine.Consumers
                             break;
 
                         case AnalysisStatus.Completed:
-                            _logger.LogInformation("Analysis completed for {SerialNumber}",
-                                message.SerialNumber);
-                            // Publish final results
+                            _logger.LogInformation("Analysis completed for {SerialNumber}", message.SerialNumber);
                             await PublishResultsToQualityManager(message.SerialNumber, results);
                             return;
 
@@ -162,27 +168,32 @@ namespace AnalysisEngine.Consumers
 
         private async Task PublishResultsToQualityManager(string serialNumber, List<AnalysisResult> results)
         {
-            // Convert results to your message format and publish to QualityManager
-            var resultMessage = new AnalysisResultMessage
+            try
             {
-                SerialNumber = serialNumber,
-                CompletedAt = DateTime.UtcNow,
-                Results = results.Select(r => new AnalysisResultDetail
+                var resultMessage = new AnalysisResultMessage
                 {
-                    AnalysisType = r.AnalysisType,
-                    Passed = r.Passed,
-                    Value = r.Value,
-                    Unit = r.Unit,
-                    Details = r.Details
-                }).ToList()
-            };
+                    SerialNumber = serialNumber,
+                    CompletedAt = DateTime.UtcNow,
+                    Results = results.Select(r => new AnalysisResultDetail
+                    {
+                        AnalysisId = r.AnalysisId,
+                        AnalysisType = r.AnalysisType,
+                        Passed = r.Passed,
+                        Value = r.Value,
+                        Unit = r.Unit,
+                        Details = r.Details
+                    }).ToList()
+                };
 
-            var messageBody = JsonSerializer.SerializeToUtf8Bytes(resultMessage);
-            _channel.BasicPublish(
-                exchange: "food_analysis",
-                routingKey: "analysis_results",
-                basicProperties: null,
-                body: messageBody);
+                await _resultPublisher.PublishAnalysisResultsAsync(resultMessage);
+
+                _logger.LogInformation("Successfully published results for serial number: {SerialNumber}", serialNumber);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to publish results for serial number: {SerialNumber}", serialNumber);
+                throw;
+            }
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)

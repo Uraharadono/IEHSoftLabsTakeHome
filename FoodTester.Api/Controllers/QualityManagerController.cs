@@ -101,7 +101,7 @@ namespace FoodTester.Api.Controllers
             {
                 SerialNumber = foodBatch.SerialNumber,
                 // FoodType = food,
-                RequiredAnalyses = foodBatch.AnalysisRequests.Select(s => s.AnalysisType).ToArray(),
+                RequiredAnalyses = foodBatch.AnalysisRequests.Select(s => new FoodAnalysisType { AnalysisId = s.Id, AnalysisName = s.AnalysisType }).ToArray(),
                 RequestedAt = DateTime.UtcNow
             };
             await _publisher.PublishAnalysisRequestAsync(message);
@@ -117,7 +117,7 @@ namespace FoodTester.Api.Controllers
             {
                 SerialNumber = "SERIJSKI BROJ",
                 FoodType = "TIP HRANE",
-                RequiredAnalyses = ["analiza 1", "analiza 2", "analiza 3"],
+                // RequiredAnalyses = ["analiza 1", "analiza 2", "analiza 3"],
                 RequestedAt = DateTime.UtcNow
             };
             await _publisher.PublishAnalysisRequestAsync(message);

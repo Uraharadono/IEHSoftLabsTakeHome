@@ -11,7 +11,13 @@ service AnalysisService {
 message AnalysisRequest {
   string serial_number = 1;
   string food_type = 2;
-  repeated string required_analyses = 3;
+  // repeated string required_analyses = 3;
+  repeated FoodAnalysisType required_analyses = 3;
+}
+
+message FoodAnalysisType{
+  int64 analysis_id = 1;
+  string analysis_name = 2;
 }
 
 message AnalysisUpdate {
@@ -27,6 +33,7 @@ message AnalysisResult {
   string details = 3;
   double value = 4;
   string unit = 5;
+  int64 analysis_id = 6;
 }
 
 enum AnalysisStatus {

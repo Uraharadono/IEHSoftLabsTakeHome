@@ -9,6 +9,7 @@ namespace FoodTester.Services.FoodBatchService
     {
         Task<FoodBatchDto> CreateFoodBatchAsync(FoodBatchDto foodBatchDto);
         Task<FoodBatchDto> GetFoodBatchAsync(long id, bool includeAnalysisRequests = false);
+        Task<bool> UpdateFoodBatchAnalysis(FoodBatchAnalysisResultsDto dto);
         Task<List<string>> GetAnalysisResults(string serialNumber);
     }
 }

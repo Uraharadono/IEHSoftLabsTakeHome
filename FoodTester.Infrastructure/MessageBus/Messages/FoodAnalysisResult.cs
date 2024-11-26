@@ -12,6 +12,7 @@ namespace FoodTester.Infrastructure.MessageBus.Messages
 
     public record AnalysisResultDetail
     {
+        public long AnalysisId { get; init; }
         public string AnalysisType { get; init; }
         public bool Passed { get; init; }
         public double Value { get; init; }
