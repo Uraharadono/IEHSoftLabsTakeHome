@@ -70,7 +70,7 @@ namespace AnalysisEngine.Consumers
             };
 
             _channel.BasicConsume(queue: QueueName,
-                                  autoAck: false,
+                                  autoAck: true,
                                   consumer: consumer);
 
             return Task.CompletedTask;

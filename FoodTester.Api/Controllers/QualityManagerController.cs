@@ -109,21 +109,6 @@ namespace FoodTester.Api.Controllers
             return Ok();
         }
 
-
-        [HttpGet("test-lalala")]
-        public async Task<IActionResult> TestLalala()
-        {
-            var message = new FoodAnalysisMessage
-            {
-                SerialNumber = "SERIJSKI BROJ",
-                FoodType = "TIP HRANE",
-                // RequiredAnalyses = ["analiza 1", "analiza 2", "analiza 3"],
-                RequestedAt = DateTime.UtcNow
-            };
-            await _publisher.PublishAnalysisRequestAsync(message);
-            return Ok();
-        }
-
         [HttpGet("analysis-request/{id}")]
         [ProducesResponseType(typeof(AnalysisRequestDto), 200)]
         [ProducesResponseType(404)]
