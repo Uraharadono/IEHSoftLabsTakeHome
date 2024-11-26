@@ -17,7 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnalysisEngine", "AnalysisE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnalysisWorker", "AnalysisWorker\AnalysisWorker.csproj", "{DFAEEF03-9B23-43C1-B3CA-43B0C9EC77C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodTester.Tests", "FoodTester.Tests\FoodTester.Tests.csproj", "{87BEC64E-452D-46F7-B840-A236A79B3241}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FoodTester.Tests", "FoodTester.Tests\FoodTester.Tests.csproj", "{87BEC64E-452D-46F7-B840-A236A79B3241}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{C6DE090B-A04F-4C40-8CE8-0BB8E50B799C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{87BEC64E-452D-46F7-B840-A236A79B3241}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87BEC64E-452D-46F7-B840-A236A79B3241}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87BEC64E-452D-46F7-B840-A236A79B3241}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6DE090B-A04F-4C40-8CE8-0BB8E50B799C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6DE090B-A04F-4C40-8CE8-0BB8E50B799C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6DE090B-A04F-4C40-8CE8-0BB8E50B799C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6DE090B-A04F-4C40-8CE8-0BB8E50B799C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

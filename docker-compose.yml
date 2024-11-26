@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  foodtester.api:
+    image: ${DOCKER_REGISTRY-}foodtesterapi
+    build:
+      context: .
+      dockerfile: FoodTester.Api/Dockerfile
+    ports:
+      - "5000:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mssql:
+        condition: service_started
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8080
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - mynetwork
+
+  analysisengine:
+    image: ${DOCKER_REGISTRY-}analysisengine
+    build:
+      context: .
+      dockerfile: AnalysisEngine/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - DOTNET_ENVIRONMENT=Docker
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - mynetwork
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - mynetwork
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: MikeyTest!
+      ACCEPT_EULA: Y
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql/data
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  mssql_data:
+  rabbitmq_data:

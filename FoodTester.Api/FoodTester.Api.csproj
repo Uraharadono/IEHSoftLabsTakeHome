@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <UserSecretsId>e720300f-bc20-4f35-a830-ea12a46e6816</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
     <!--<StartupObject></StartupObject>
     <ApplicationIcon />
     <OutputType>Exe</OutputType>-->
@@ -15,6 +18,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
 	<PackageReference Include="Serilog" Version="3.1.1" />
 	<PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
