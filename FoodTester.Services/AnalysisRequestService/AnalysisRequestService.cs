@@ -27,7 +27,12 @@ namespace FoodTester.Services.AnalysisRequestService
 
         public async Task<AnalysisRequestDto> GetAnalysisRequestAsync(long id)
         {
-            return (AnalysisRequestDto)(await _context.AnalysisRequests.FirstOrDefaultAsync(x => x.Id == id));
+            var analysisRequest = await _context.AnalysisRequests.FirstOrDefaultAsync(x => x.Id == id);
+            if (analysisRequest == null)
+            {
+                return null;
+            }
+            return (AnalysisRequestDto)analysisRequest;
         }
     }
 }

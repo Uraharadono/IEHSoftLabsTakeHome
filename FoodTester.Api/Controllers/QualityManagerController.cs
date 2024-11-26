@@ -129,7 +129,7 @@ namespace FoodTester.Api.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> GetStatus(string serialNumber)
         {
-            var analysisResults = _foodBatchService.GetAnalysisResults(serialNumber);
+            var analysisResults = await _foodBatchService.GetAnalysisResults(serialNumber);
 
             if (analysisResults == null)
             {

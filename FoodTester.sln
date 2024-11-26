@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FoodTester.Services", "Food
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnalysisEngine", "AnalysisEngine\AnalysisEngine.csproj", "{F42D8A53-0AFD-4B51-A360-7C89043294DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalysisWorker", "AnalysisWorker\AnalysisWorker.csproj", "{DFAEEF03-9B23-43C1-B3CA-43B0C9EC77C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnalysisWorker", "AnalysisWorker\AnalysisWorker.csproj", "{DFAEEF03-9B23-43C1-B3CA-43B0C9EC77C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodTester.Tests", "FoodTester.Tests\FoodTester.Tests.csproj", "{87BEC64E-452D-46F7-B840-A236A79B3241}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{DFAEEF03-9B23-43C1-B3CA-43B0C9EC77C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFAEEF03-9B23-43C1-B3CA-43B0C9EC77C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFAEEF03-9B23-43C1-B3CA-43B0C9EC77C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87BEC64E-452D-46F7-B840-A236A79B3241}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87BEC64E-452D-46F7-B840-A236A79B3241}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87BEC64E-452D-46F7-B840-A236A79B3241}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87BEC64E-452D-46F7-B840-A236A79B3241}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
