@@ -87,7 +87,7 @@ namespace AnalysisEngine.Consumers
                     message.SerialNumber);
 
                 // 1. Create and start the AnalysisWorker container
-                /* containerId = await _dockerService.StartAnalysisWorkerAsync(message);
+                containerId = await _dockerService.StartAnalysisWorkerAsync(message);
                 _logger.LogInformation("Started container {ContainerId}", containerId);
 
                 // 2. Get the container's gRPC port mapping
@@ -95,10 +95,11 @@ namespace AnalysisEngine.Consumers
                 var hostPort = containerInfo.Ports.First().PublicPort;
 
                 // 3. Create gRPC channel to the worker
-                // var channelUrl = $"http://localhost:{hostPort}";
-                // _grpcChannels[containerId] = grpcChannel; */
-                var channelUrl = "https://localhost:44336";
+                var channelUrl = $"http://localhost:{hostPort}";
                 grpcChannel = GrpcChannel.ForAddress(channelUrl);
+                _grpcChannels[containerId] = grpcChannel;
+                /*var channelUrl = "https://localhost:44336";
+                grpcChannel = GrpcChannel.ForAddress(channelUrl);*/
 
                 var client = new AnalysisService.AnalysisServiceClient(grpcChannel);
 
