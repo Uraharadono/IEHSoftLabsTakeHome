@@ -32,6 +32,25 @@ services:
     environment:
       - DOTNET_ENVIRONMENT=Docker
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./logs:/app/logs
+    networks:
+      - mynetwork
+
+  analysisworker:
+    image: ${DOCKER_REGISTRY-}analysis-worker:latest
+    build:
+      context: .
+      dockerfile: AnalysisWorker/Dockerfile
+    ports:
+      - "5004:8080"  # Map host port 5004 to container port 8080
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - DOTNET_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8080  # Ensure this matches the exposed port
+    volumes:
       - ./logs:/app/logs
     networks:
       - mynetwork

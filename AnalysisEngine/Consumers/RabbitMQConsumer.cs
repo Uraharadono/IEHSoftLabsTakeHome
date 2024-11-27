@@ -50,28 +50,38 @@ namespace AnalysisEngine.Consumers
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("Starting RabbitMQ consumer...");
+
             var consumer = new EventingBasicConsumer(_channel);
 
             consumer.Received += async (model, eventArgs) =>
             {
-                var body = eventArgs.Body.ToArray();
-                var message = JsonSerializer.Deserialize<FoodAnalysisMessage>(Encoding.UTF8.GetString(body));
-
                 try
                 {
+                    var body = eventArgs.Body.ToArray();
+                    var messageBody = Encoding.UTF8.GetString(body);
+
+                    _logger.LogInformation("Received message: {MessageBody}", messageBody);
+
+                    var message = JsonSerializer.Deserialize<FoodAnalysisMessage>(messageBody);
+
+                    _logger.LogInformation("Deserialized message for serial number: {SerialNumber}", message.SerialNumber);
+
                     await ProcessMessage(message);
                     _channel.BasicAck(eventArgs.DeliveryTag, false);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error processing message");
+                    _logger.LogError(ex, "Error processing received message");
                     _channel.BasicNack(eventArgs.DeliveryTag, false, true);
                 }
             };
 
             _channel.BasicConsume(queue: QueueName,
-                                  autoAck: true,
+                                  autoAck: false,
                                   consumer: consumer);
+
+            _logger.LogInformation("RabbitMQ consumer started and waiting for messages");
 
             return Task.CompletedTask;
         }
@@ -95,9 +105,10 @@ namespace AnalysisEngine.Consumers
                 var hostPort = containerInfo.Ports.First().PublicPort;
 
                 // 3. Create gRPC channel to the worker
-                var channelUrl = $"http://localhost:{hostPort}";
+                var channelUrl = $"http://analysisworker:8080";
                 grpcChannel = GrpcChannel.ForAddress(channelUrl);
                 _grpcChannels[containerId] = grpcChannel;
+                // var channelUrl = $"http://localhost:{hostPort}";
                 /*var channelUrl = "https://localhost:44336";
                 grpcChannel = GrpcChannel.ForAddress(channelUrl);*/
 
