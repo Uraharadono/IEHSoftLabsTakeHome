@@ -4,7 +4,7 @@ using FoodTester.Infrastructure.Settings;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using FoodTester.Services.Sample;
+using FoodTester.Services.AnalysisRequestService;
 
 namespace FoodTester.Api.Utility.Extensions
 {
@@ -36,7 +36,7 @@ namespace FoodTester.Api.Utility.Extensions
 
         private static IEnumerable<Assembly> GetServicesInjectableAssemblies()
         {
-            yield return Assembly.GetAssembly(typeof(SampleService)); // Services
+            yield return Assembly.GetAssembly(typeof(AnalysisRequestService)); // Services
         }
 
         private static void RegisterAppSettingsFromAssembly(IServiceCollection services, Assembly assembly)
