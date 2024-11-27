@@ -1,33 +1,28 @@
-
 # IEHSoftLabsTakeHome
 
 ### Steps to run (`docker-compose`):
 
-1. Open shell at root folder of the solution
+1. Open shell at root folder of the solution (use git one if you don't have any other)
 2. Run following commands (in order):
-- `docker-compose down` # Stop and remove all containers - isn't neccesary per se, but doesn't hurt
+- `docker-compose down` # Stop and remove all containers - isn't necessary for first run, but is if ran multiple times
 - `docker-compose build` # Rebuild
 - `docker-compose up --build` # Run with more verbose output
 3. Navigate to: http://localhost:5000/index.html
+4. Do stuff :)
 
 
 ### Steps to run (with Visual studio - no docker):
-(Disclaimer: Creating the docker specific appsettings (appsettings.Docker.json) did not work, because whatever I did RabbitMq caused some issues. So, before resorting to running stuff in VisualStudio adjust the appsettings.json in FoodTester.Api and AnalysisEngine a.k.a ucomment commented lines, remove old ones.)
+(***Disclaimer:*** *Creating the docker specific appsettings (appsettings.Docker.json) did not work, because whatever I did RabbitMq caused some issues. So, before resorting to running stuff in VisualStudio adjust the appsettings.json in FoodTester.Api and AnalysisEngine a.k.a ucomment commented lines, remove old ones.*)
 1. Open project, package manage console, run command: `Update-Database`
 2. Run docker app
 3. Run rabbitMq (should run automatically on system startup tho)
 4.  Navigate to the AnalysisWorker project directory
-
-_command_: `cd AnalysisWorker`
-
-Then build the Docker image 
-
-_command_: `docker build --no-cache -t analysis-worker:latest .`
-
+- _command_: `cd AnalysisWorker`
+- Then build the Docker image 
+- _command_: `docker build --no-cache -t analysis-worker:latest .`
 (*docker build -t analysis-worker:latest .*)
 
 5. In Visual studio set following projects as startup ones: **FoodTester.Api** & **AnalysisEngine**
-
 ** AnalysisWorker** project will be resolved dynamically by **AnalysisEngine**.
 
 # How I designed flow:
