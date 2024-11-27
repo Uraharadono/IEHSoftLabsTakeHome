@@ -2,7 +2,7 @@
 # IEHSoftLabsTakeHome
 
 ##### Disclamer:
-As for now I have not managed to make `docker-compose` build this whole project. I am struggling with SQL server inside my docker containers, and I have been implementing that logic in the [docker-compose-implementation](https://github.com/Uraharadono/IEHSoftLabsTakeHome/tree/docker-compose-implementation) branch.
+As for now I have not managed to make `docker-compose` build this whole project. I am struggling with orchestrating projects intermediate dependencies [docker-compose-implementation](https://github.com/Uraharadono/IEHSoftLabsTakeHome/tree/docker-compose-implementation) branch.
 
 ### Steps to run (with Visual studio - no docker):
 
