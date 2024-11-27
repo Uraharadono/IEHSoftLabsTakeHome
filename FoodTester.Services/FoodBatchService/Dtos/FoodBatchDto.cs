@@ -27,13 +27,14 @@ namespace FoodTester.Services.FoodBatchService.Dtos
 
         public static explicit operator FoodBatchDto(FoodBatch model)
         {
-            return new FoodBatchDto
-            {
-                Id = model.Id,
-                Name = model.Name,
-                SerialNumber = model.SerialNumber,
-                AnalysisRequests = model.AnalysisRequests?.Select(ar => (AnalysisRequestDto)ar).ToList()
-            };
+            return model != null ?
+             new FoodBatchDto
+             {
+                 Id = model.Id,
+                 Name = model.Name,
+                 SerialNumber = model.SerialNumber,
+                 AnalysisRequests = model.AnalysisRequests?.Select(ar => (AnalysisRequestDto)ar).ToList()
+             } : null;
         }
     }
 }
