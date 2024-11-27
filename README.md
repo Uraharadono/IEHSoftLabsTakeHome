@@ -10,9 +10,13 @@ As for now I have not managed to make `docker-compose` build this whole project.
 2. Run docker app
 3. Run rabbitMq (should run automatically on system startup tho)
 4.  Navigate to the AnalysisWorker project directory
-run command: `cd AnalysisWorker`
+
+_command_: `cd AnalysisWorker`
+
 Then build the Docker image 
-then run: `docker build --no-cache -t analysis-worker:latest .`
+
+_command_: `docker build --no-cache -t analysis-worker:latest .`
+
 (*docker build -t analysis-worker:latest .*)
 
 5. In Visual studio set following projects as startup ones: **FoodTester.Api** & **AnalysisEngine**
