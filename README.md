@@ -1,7 +1,7 @@
 # IEHSoftLabsTakeHome
 
 ### Steps to run (`docker-compose`):
-
+0. Run docker.
 1. Open shell at root folder of the solution (use git one if you don't have any other)
 2. Run following commands (in order):
 - `docker-compose down` # Stop and remove all containers - isn't necessary for first run, but is if ran multiple times
