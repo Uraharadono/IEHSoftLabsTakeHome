@@ -28,6 +28,9 @@
 # How I designed flow:
 ![image](https://github.com/user-attachments/assets/8bdea940-00df-4438-99ec-4835058334e2)
 
+# Video explanation
+
+https://youtu.be/YPYi7-FuF0E
 
 # Info
 1. Project with name "**QualityManager** " in pdf of task, I have named "**FoodTester.Api**". 
