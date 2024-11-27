@@ -24,7 +24,6 @@ namespace FoodTester.DbContext.Infrastructure
             return new FoodQualityContext(optionsBuilder.Options);
         }
 
-        public virtual DbSet<Sample> Samples { get; set; }
         public DbSet<FoodBatch> FoodBatches { get; set; }
         public DbSet<AnalysisType> AnalysisTypes { get; set; }
         public DbSet<AnalysisRequest> AnalysisRequests { get; set; }
