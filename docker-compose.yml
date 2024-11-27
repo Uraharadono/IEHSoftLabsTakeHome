@@ -56,9 +56,18 @@ services:
 
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    user: root
+    command: >
+      bash -c "
+        mkdir -p /var/opt/mssql/data
+        chown -R mssql:mssql /var/opt/mssql/data
+        chmod 777 /var/opt/mssql/data
+        /opt/mssql/bin/sqlservr
+      "
     environment:
-      SA_PASSWORD: MikeyTest!
+      MSSQL_SA_PASSWORD: MikeyTest!233
       ACCEPT_EULA: Y
+      MSSQL_PID: Developer 
     ports:
       - "1433:1433"
     volumes:
