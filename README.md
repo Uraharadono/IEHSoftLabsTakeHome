@@ -1,7 +1,7 @@
 # IEHSoftLabsTakeHome
 
 ### Steps to run (`docker-compose`):
-
+0. Run docker.
 1. Open shell at root folder of the solution (use git one if you don't have any other)
 2. Run following commands (in order):
 - `docker-compose down` # Stop and remove all containers - isn't necessary for first run, but is if ran multiple times
@@ -28,6 +28,9 @@
 # How I designed flow:
 ![image](https://github.com/user-attachments/assets/8bdea940-00df-4438-99ec-4835058334e2)
 
+# Video explanation
+
+https://youtu.be/YPYi7-FuF0E
 
 # Info
 1. Project with name "**QualityManager** " in pdf of task, I have named "**FoodTester.Api**". 
