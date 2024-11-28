@@ -84,7 +84,9 @@ namespace FoodTester.Services.FoodBatchService
                 return null;
             }
 
-            return foodBatch.AnalysisRequests.Select(a => a.AnalysisResult.ResultData).ToList();
+            if (foodBatch == null || !foodBatch.AnalysisRequests.Any() || foodBatch.AnalysisRequests.All(s => s.AnalysisResult == null))
+                return null;
+            return foodBatch.AnalysisRequests.Select(a => a.AnalysisResult?.ResultData).ToList();
         }
     }
 }

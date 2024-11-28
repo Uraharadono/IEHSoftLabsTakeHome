@@ -131,7 +131,7 @@ namespace FoodTester.Api.Controllers
         {
             var analysisResults = await _foodBatchService.GetAnalysisResults(serialNumber);
 
-            if (analysisResults == null)
+            if (analysisResults == null || !analysisResults.Any())
             {
                 return NotFound();
             }
