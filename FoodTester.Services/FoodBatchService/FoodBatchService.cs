@@ -38,39 +38,31 @@ namespace FoodTester.Services.FoodBatchService
 
         public async Task<bool> UpdateFoodBatchAnalysis(FoodBatchAnalysisResultsDto dto)
         {
-            try
+            if (dto == null) return false;
+            var fBatch = await _context.FoodBatches.FirstOrDefaultAsync(s => s.SerialNumber == dto.SerialNumber);
+            fBatch.ModifiedAt = DateTime.UtcNow;
+
+            var analysisRequests = await _context.AnalysisRequests.Where(s => dto.AnalysisResults.Select(d => d.AnalysisId).Contains(s.Id)).ToListAsync();
+            foreach (var analysisRequest in analysisRequests)
             {
-                if (dto == null) return false;
-                var fBatch = await _context.FoodBatches.FirstOrDefaultAsync(s => s.SerialNumber == dto.SerialNumber);
-                fBatch.ModifiedAt = DateTime.UtcNow;
-
-                var analysisRequests = await _context.AnalysisRequests.Where(s => dto.AnalysisResults.Select(d => d.AnalysisId).Contains(s.Id)).ToListAsync();
-                foreach (var analysisRequest in analysisRequests)
-                {
-                    analysisRequest.Status = EAnalysisRequestStatus.COMPLETED.ToString();
-                }
-
-                var resultsList = new List<AnalysisResult>();
-                foreach (var analysisResult in dto.AnalysisResults)
-                {
-                    resultsList.Add(new AnalysisResult
-                    {
-                        Id = analysisResult.AnalysisId,
-                        ResultData = analysisResult.ResultData,
-                        CompletedAt = DateTime.UtcNow
-                    });
-                }
-
-                await _context.AnalysisResults.AddRangeAsync(resultsList);
-                await _context.SaveChangesAsync();
-
-                return true;
+                analysisRequest.Status = EAnalysisRequestStatus.COMPLETED.ToString();
             }
-            catch (Exception e)
+
+            var resultsList = new List<AnalysisResult>();
+            foreach (var analysisResult in dto.AnalysisResults)
             {
-
-                throw;
+                resultsList.Add(new AnalysisResult
+                {
+                    Id = analysisResult.AnalysisId,
+                    ResultData = analysisResult.ResultData,
+                    CompletedAt = DateTime.UtcNow
+                });
             }
+
+            await _context.AnalysisResults.AddRangeAsync(resultsList);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<List<string>> GetAnalysisResults(string serialNumber)
